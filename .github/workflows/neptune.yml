@@ -24,7 +24,24 @@ permissions:
 jobs:
   neptune:
     runs-on: [self-hosted, medium]  # Private repo; switch to ubuntu-latest when public
+    timeout-minutes: 60
     steps:
+      - name: Validate dispatch payload
+        env:
+          PR_NUMBER: ${{ github.event.client_payload.pull_request_number }}
+          PR_BRANCH: ${{ github.event.client_payload.pull_request_branch }}
+          NEPTUNE_COMMAND: ${{ github.event.client_payload.command }}
+        run: |
+          set -euo pipefail
+          if ! echo "$PR_NUMBER" | grep -qE '^[0-9]+$'; then
+            echo "::error::Invalid pull_request_number: $PR_NUMBER"
+            exit 1
+          fi
+          case "$NEPTUNE_COMMAND" in
+            plan|apply|unlock) ;;
+            *) echo "::error::Invalid neptune command: $NEPTUNE_COMMAND"; exit 1 ;;
+          esac
+
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -33,17 +50,26 @@ jobs:
       # Check PR description for a neptune-ref override (used by Neptune CI tests)
       - name: Check for Neptune ref override
         id: neptune-ref
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.client_payload.pull_request_number }}
         run: |
-          NEPTUNE_REF=$(gh pr view "${{ github.event.client_payload.pull_request_number }}" \
+          set -euo pipefail
+          RAW_REF=$(gh pr view "$PR_NUMBER" \
             --json body --jq '.body' | grep -oP 'neptune-ref:\s*\K\S+' || echo "")
-          echo "ref=$NEPTUNE_REF" >> "$GITHUB_OUTPUT"
-          if [ -n "$NEPTUNE_REF" ]; then
-            echo "Building Neptune from source at ref: $NEPTUNE_REF"
+
+          if [ -n "$RAW_REF" ]; then
+            # Accept only 40-character hex SHA
+            if ! echo "$RAW_REF" | grep -qE '^[0-9a-f]{40}$'; then
+              echo "::error::Invalid neptune-ref (must be 40-char commit SHA): $RAW_REF"
+              exit 1
+            fi
+            echo "Building Neptune from source at ref: $RAW_REF"
           else
             echo "Using released Neptune binary"
           fi
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+          echo "ref=$RAW_REF" >> "$GITHUB_OUTPUT"
 
       # --- Mode A: Released binary (normal webhook flow) ---
       - name: Install Neptune (release)
@@ -62,10 +88,12 @@ jobs:
 
       - name: Build Neptune from source (CI testing)
         if: steps.neptune-ref.outputs.ref != ''
+        env:
+          NEPTUNE_REF: ${{ steps.neptune-ref.outputs.ref }}
         run: |
           git init /tmp/neptune-src && cd /tmp/neptune-src
           git remote add origin https://github.com/devopsfactory-io/neptune.git
-          git fetch --depth 1 origin "${{ steps.neptune-ref.outputs.ref }}"
+          git fetch --depth 1 origin -- "$NEPTUNE_REF"
           git checkout FETCH_HEAD
           go build -o /usr/local/bin/neptune .
 
@@ -89,11 +117,17 @@ jobs:
           chmod +x /usr/local/bin/terragrunt
 
       - name: Run Neptune
-        run: neptune command ${{ github.event.client_payload.command }}
         env:
+          NEPTUNE_COMMAND: ${{ github.event.client_payload.command }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_PULL_REQUEST_NUMBER: ${{ github.event.client_payload.pull_request_number }}
           GITHUB_PULL_REQUEST_BRANCH: ${{ github.event.client_payload.pull_request_branch }}
           GITHUB_RUN_ID: ${{ github.run_id }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TERRAGRUNT_TFPATH: tofu
+        run: |
+          case "$NEPTUNE_COMMAND" in
+            plan|apply|unlock) ;;
+            *) echo "::error::Invalid command: $NEPTUNE_COMMAND"; exit 1 ;;
+          esac
+          neptune command "$NEPTUNE_COMMAND"
