@@ -1,3 +1,0 @@
-stack {
-  name = "foundation/org"
-}
