@@ -76,8 +76,8 @@ jobs:
         if: steps.neptune-ref.outputs.ref == ''
         run: |
           NEPTUNE_VERSION="v0.2.0"
-          curl -sSL "https://github.com/devopsfactory-io/neptune/releases/download/${NEPTUNE_VERSION}/neptune_${NEPTUNE_VERSION}_linux_amd64.tar.gz" \
-            | tar -xz -C /usr/local/bin neptune
+          curl -sSL "https://github.com/devopsfactory-io/neptune/releases/download/${NEPTUNE_VERSION}/neptune-linux-amd64" \
+            -o /usr/local/bin/neptune && chmod +x /usr/local/bin/neptune
 
       # --- Mode B: Build from source (Neptune CI testing) ---
       - name: Setup Go (CI testing)
