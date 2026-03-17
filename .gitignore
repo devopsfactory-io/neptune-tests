@@ -27,3 +27,6 @@ output.txt
 # OS
 .DS_Store
 Thumbs.db
+
+# Paperclip
+.paperclip-*
