@@ -7,5 +7,5 @@ include "root" {
 }
 
 inputs = {
-  stack_name = "apps/web/ci-84-1"
+  stack_name = "apps/web/ci-84-2"
 }
