@@ -1,5 +1,5 @@
 terraform {
-  source = "../../_modules/null-stack"
+  source = "../../../_modules/null-stack"
 }
 
 include "root" {
@@ -7,5 +7,5 @@ include "root" {
 }
 
 inputs = {
-  stack_name = "foundation/org"
+  stack_name = "apps/web/ci-84-1"
 }
