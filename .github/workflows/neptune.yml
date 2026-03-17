@@ -76,13 +76,19 @@ jobs:
 
           echo "ref=$RAW_REF" >> "$GITHUB_OUTPUT"
 
+      # Add a user-writable bin directory to PATH for all subsequent steps
+      - name: Add local bin to PATH
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/bin"
+          echo "$GITHUB_WORKSPACE/bin" >> "$GITHUB_PATH"
+
       # --- Mode A: Released binary (normal webhook flow) ---
       - name: Install Neptune (release)
         if: steps.neptune-ref.outputs.ref == ''
         run: |
           NEPTUNE_VERSION="v0.2.0"
           curl -sSL "https://github.com/devopsfactory-io/neptune/releases/download/${NEPTUNE_VERSION}/neptune-linux-amd64" \
-            -o /usr/local/bin/neptune && chmod +x /usr/local/bin/neptune
+            -o "$GITHUB_WORKSPACE/bin/neptune" && chmod +x "$GITHUB_WORKSPACE/bin/neptune"
 
       # --- Mode B: Build from source (Neptune CI testing) ---
       - name: Setup Go (CI testing)
@@ -100,7 +106,7 @@ jobs:
           git remote add origin https://github.com/devopsfactory-io/neptune.git
           git fetch --depth 1 origin -- "$NEPTUNE_REF"
           git checkout FETCH_HEAD
-          go build -o /usr/local/bin/neptune .
+          go build -o "$GITHUB_WORKSPACE/bin/neptune" .
 
       # --- Common steps ---
       - name: Configure AWS credentials
@@ -118,8 +124,8 @@ jobs:
         run: |
           TERRAGRUNT_VERSION="0.75.0"
           curl -sSL "https://github.com/gruntwork-io/terragrunt/releases/download/v${TERRAGRUNT_VERSION}/terragrunt_linux_amd64" \
-            -o /usr/local/bin/terragrunt
-          chmod +x /usr/local/bin/terragrunt
+            -o "$GITHUB_WORKSPACE/bin/terragrunt"
+          chmod +x "$GITHUB_WORKSPACE/bin/terragrunt"
 
       - name: Run Neptune
         env:
