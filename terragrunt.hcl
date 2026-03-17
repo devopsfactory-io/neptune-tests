@@ -1,12 +1,5 @@
 remote_state {
   backend = "s3"
-
-  # Prevent Terragrunt from prompting to update bucket properties (versioning,
-  # encryption, etc.) during init. The bucket is already configured with the
-  # required security settings. Without this flag, non-interactive CI fails
-  # with EOF when Terragrunt prompts for confirmation.
-  disable_bucket_update = true
-
   generate = {
     path      = "backend.tf"
     if_exists = "overwrite_terragrunt"
@@ -15,5 +8,15 @@ remote_state {
     bucket = "tf-neptune-tests-backend"
     key    = "${path_relative_to_include()}/terraform.tfstate"
     region = "us-east-1"
+
+    # Skip Terragrunt bucket property checks during init. The bucket is already
+    # configured with proper security settings. Without these flags, Terragrunt
+    # prompts to update bucket properties which fails with EOF in CI.
+    skip_bucket_versioning             = true
+    skip_bucket_ssencryption           = true
+    skip_bucket_root_access            = true
+    skip_bucket_enforced_tls           = true
+    skip_bucket_public_access_blocking = true
+    skip_bucket_accesslogging          = true
   }
 }
