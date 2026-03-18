@@ -88,7 +88,7 @@ See `.neptune.yaml` for the full config. Key settings:
 
 - `stacks_management: local` — Neptune discovers stacks via `stack.hcl` files
 - `automerge: true` — PRs auto-merge after successful apply
-- Workflow steps use `terragrunt init/plan/apply` with `TERRAGRUNT_TFPATH=tofu`
+- Workflow steps use `terragrunt init/plan/apply` with `TG_TF_PATH=tofu`
 
 ---
 
