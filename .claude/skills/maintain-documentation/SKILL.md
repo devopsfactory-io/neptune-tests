@@ -16,6 +16,6 @@ Use this skill when:
 
 ## What to Do
 
-**Delegate documentation updates to the documentation-maintainer subagent** (`.claude/agents/documentation-maintainer.md`).
+**Delegate documentation updates to the documentation-maintainer subagent** (managed in the hub at `.claude/agents/neptune-tests/documentation-maintainer/`).
 
-When this skill applies, invoke the **documentation-maintainer** subagent with a prompt that describes what changed so it can run its full checklist and update README, CLAUDE.md, .claude/agents, and .claude/skills as needed.
+When this skill applies, invoke the **documentation-maintainer** subagent with a prompt that describes what changed so it can run its full checklist and update README, CLAUDE.md, and .claude/skills as needed.
