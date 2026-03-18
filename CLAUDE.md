@@ -107,7 +107,7 @@ Do not modify the workflow without understanding the Neptune CI testing flow. Ch
 
 ## Agents, Commands, and Skills
 
-Available in `.claude/`:
+**Agents** are managed centrally in the [code-agent-hub](https://github.com/devopsfactory-io/code-agent-hub) repository at `.claude/agents/neptune-tests/`. They are no longer stored in this repo's `.claude/agents/` directory.
 
 | Type | Name | Purpose |
 | ---- | ---- | ------- |
@@ -120,6 +120,11 @@ Available in `.claude/`:
 | Agent | `pr-reviewer` | Reviews PRs for IaC quality, DCO, and docs |
 | Agent | `issue-reviewer` | Triages open issues; validates drafts before upload |
 | Agent | `issue-writer` | Creates GitHub issues from `/feature` and `/bug` |
+
+**Commands and Skills** remain in `.claude/`:
+
+| Type | Name | Purpose |
+| ---- | ---- | ------- |
 | Command | `/bug` | Create a bug report (invokes issue-writer) |
 | Command | `/feature` | Create a feature request (invokes issue-writer) |
 | Skill | `maintain-documentation` | Delegates doc updates to documentation-maintainer agent |
