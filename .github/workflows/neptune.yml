@@ -23,7 +23,7 @@ permissions:
 
 jobs:
   neptune:
-    runs-on: [self-hosted, large]  # Private repo; switch to ubuntu-latest when public
+    runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
       - name: Validate dispatch payload
