@@ -34,6 +34,7 @@ done
 - **Dual-mode binary:**
   - **Normal (webhook):** Downloads released Neptune binary (`v0.2.0`)
   - **CI testing:** If PR description contains `neptune-ref: <SHA>`, clones Neptune at that SHA and builds from source
+    - Go version comes from `go-version-file: /tmp/neptune-src/go.mod`, set up after the source fetch, with the cache keyed on `/tmp/neptune-src/go.sum`
 - **Tools:** OpenTofu 1.9.0, Terragrunt 0.75.0
 - **AWS:** OIDC-based credential assumption via `aws-actions/configure-aws-credentials@v4`
 - **Runner:** `[self-hosted, medium]`
