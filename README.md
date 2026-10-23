@@ -43,6 +43,8 @@ See [`.neptune.yaml`](.neptune.yaml) for the full config. Key settings:
 
 When a PR is opened on the Neptune repository, the CI creates a test PR here with dynamic stacks under `apps/web/ci-<pr-id>-*/`. The `neptune.yml` workflow detects a `neptune-ref:` marker in the PR description and builds Neptune from source at that commit instead of downloading a release.
 
+In source-build mode the workflow fetches the Neptune source into `/tmp/neptune-src` before the `actions/setup-go` step. Setup-go then reads the Go version from `/tmp/neptune-src/go.mod` (`go-version-file`) and keys the dependency cache on `/tmp/neptune-src/go.sum` (`cache-dependency-path`). The build step runs `go build` in `/tmp/neptune-src`. The workflow no longer pins a fixed Go version.
+
 This tests the full webhook flow: PR creation -> neptbot webhook -> Lambda dispatch -> plan/apply.
 
 ## Tools
