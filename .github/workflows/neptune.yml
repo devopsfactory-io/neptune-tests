@@ -91,21 +91,28 @@ jobs:
             -o "$GITHUB_WORKSPACE/bin/neptune" && chmod +x "$GITHUB_WORKSPACE/bin/neptune"
 
       # --- Mode B: Build from source (Neptune CI testing) ---
-      - name: Setup Go (CI testing)
-        if: steps.neptune-ref.outputs.ref != ''
-        uses: actions/setup-go@v6
-        with:
-          go-version: '1.26'
-
-      - name: Build Neptune from source (CI testing)
+      - name: Fetch Neptune source (CI testing)
         if: steps.neptune-ref.outputs.ref != ''
         env:
           NEPTUNE_REF: ${{ steps.neptune-ref.outputs.ref }}
         run: |
+          set -euo pipefail
           git init /tmp/neptune-src && cd /tmp/neptune-src
           git remote add origin https://github.com/devopsfactory-io/neptune.git
           git fetch --depth 1 origin -- "$NEPTUNE_REF"
           git checkout FETCH_HEAD
+
+      - name: Setup Go (CI testing)
+        if: steps.neptune-ref.outputs.ref != ''
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: /tmp/neptune-src/go.mod
+          cache-dependency-path: /tmp/neptune-src/go.sum
+
+      - name: Build Neptune from source (CI testing)
+        if: steps.neptune-ref.outputs.ref != ''
+        working-directory: /tmp/neptune-src
+        run: |
           go build -o "$GITHUB_WORKSPACE/bin/neptune" .
 
       # --- Common steps ---

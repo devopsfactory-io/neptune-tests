@@ -98,6 +98,7 @@ Applies to `.github/workflows/neptune.yml`:
 
 - **Trigger**: `repository_dispatch` from Neptune GitHub App (neptbot)
 - **Dual-mode**: Downloads released Neptune binary normally; builds from source when PR description contains `neptune-ref: <SHA>` (used by Neptune CI tests)
+- **Source-build Go toolchain**: In source-build mode the workflow fetches Neptune into `/tmp/neptune-src` first, then runs `actions/setup-go@v6` with `go-version-file: /tmp/neptune-src/go.mod` and `cache-dependency-path: /tmp/neptune-src/go.sum`. The build runs `go build` with `working-directory: /tmp/neptune-src`. Do not pin a fixed Go version in this workflow
 - **Runner**: Self-hosted (`[self-hosted, medium]`)
 - **Tools**: OpenTofu 1.9.0, Terragrunt 0.75.0, AWS credentials via OIDC
 
